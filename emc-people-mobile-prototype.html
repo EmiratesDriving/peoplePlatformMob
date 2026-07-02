@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMC People Platform — Mobile Prototype</title>
+<style>
+  :root{
+    --emc-cyan:#09B9E9;--emc-aqua:#01FFFF;--emc-cyan-d:#067fa3;
+    --ink:#0c1116;--panel:#141b22;--panel-2:#1c252e;--panel-3:#243039;--line:#2a353f;
+    --txt:#eef3f6;--txt-2:#9fb0bd;--txt-3:#6c7d8a;
+    --good:#22c55e;--good-bg:#10261a;--warn:#f5b942;--warn-bg:#2a2310;--bad:#ef5350;--bad-bg:#2a1414;
+    --future:#a78bfa;--future-bg:#1e1830;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{margin:0;background:#0a0e12;font-family:'Roboto',system-ui,sans-serif;color:var(--txt);
+    display:flex;flex-wrap:wrap;gap:30px;justify-content:center;align-items:flex-start;padding:28px 16px 60px;}
+  .stage-intro{width:100%;max-width:920px;color:var(--txt-2);font-size:14px;line-height:1.7;}
+  .stage-intro h1{color:var(--txt);font-size:22px;font-weight:700;margin:0 0 6px;}
+  .brandbar{display:inline-block;width:120px;height:5px;border-radius:3px;background:linear-gradient(90deg,var(--emc-cyan),var(--emc-aqua));margin:4px 0 14px;}
+  .stage-intro code{background:var(--panel-2);padding:2px 6px;border-radius:4px;font-size:13px;color:var(--emc-cyan);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0 0;font-size:13px;}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .phone{width:380px;height:800px;background:var(--ink);border:1px solid var(--line);border-radius:34px;overflow:hidden;
+    position:relative;display:flex;flex-direction:column;box-shadow:0 0 0 6px #05080b,0 24px 60px rgba(0,0,0,.5);flex:0 0 auto;}
+  .phone-label{position:absolute;top:-24px;left:0;font-size:12px;color:var(--txt-3);letter-spacing:.3px;}
+  .statusbar{height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font-size:12px;color:var(--txt-2);flex:0 0 auto;}
+  .statusbar .r{display:flex;gap:6px;align-items:center;}
+  .topbar{display:flex;align-items:center;gap:10px;padding:8px 14px 10px;border-bottom:1px solid var(--line);background:var(--ink);flex:0 0 auto;min-height:52px;}
+  .topbar .lead{width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer;border-radius:9px;}
+  .topbar .lead:active{background:var(--panel-2);}
+  .topbar .lead i{font-size:23px;color:var(--txt);}
+  .topbar .mark{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));color:#04222b;font-weight:700;font-size:15px;}
+  .topbar .ttl{flex:1;min-width:0;}
+  .topbar .ttl b{font-size:16px;font-weight:700;display:block;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .topbar .ttl small{font-size:10px;color:var(--txt-3);letter-spacing:1.4px;font-weight:500;}
+  .topbar .bell{position:relative;color:var(--txt-2);font-size:22px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:9px;flex:0 0 auto;}
+  .topbar .bell:active{background:var(--panel-2);}
+  .topbar .bell .badge{position:absolute;top:0;right:1px;background:var(--bad);color:#fff;font-size:9.5px;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+  .topbar .badge-future{font-size:10px;font-weight:700;letter-spacing:.5px;background:var(--future-bg);color:#c9b8ff;border:1px solid #3a2f63;padding:3px 8px;border-radius:6px;}
+  .screen{flex:1;overflow-y:auto;background:var(--ink);}
+  .screen::-webkit-scrollbar{width:0;}
+  .pad{padding:16px 16px 28px;}
+  .view{display:none;}
+  .view.active{display:block;}
+  h2.title{font-size:21px;font-weight:700;margin:2px 0 2px;}
+  .sub{color:var(--txt-2);font-size:13px;margin:0 0 16px;}
+  .sec-label{font-size:11px;letter-spacing:1.4px;color:var(--txt-3);font-weight:700;margin:20px 2px 9px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:12px;}
+  .card.tap{cursor:pointer;transition:border-color .15s,background .15s;}
+  .card.tap:active{background:var(--panel-2);}
+  .row{display:flex;align-items:center;justify-content:space-between;}
+  .muted{color:var(--txt-2);font-size:13px;}
+  .chev{color:var(--txt-3);font-size:18px;}
+  .punch-wrap{background:linear-gradient(160deg,rgba(9,185,233,.14),rgba(1,255,255,.05));border:1px solid rgba(9,185,233,.3);border-radius:18px;padding:22px 16px 18px;text-align:center;margin-bottom:14px;}
+  .punch-state{font-size:13px;color:var(--emc-cyan);margin:0 0 3px;}
+  .punch-big{font-size:23px;font-weight:700;margin:0 0 16px;}
+  .punch-btn{width:142px;height:142px;border-radius:50%;border:none;cursor:pointer;margin:0 auto;background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));color:#04222b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:inherit;font-size:17px;font-weight:700;transition:transform .1s,opacity .2s;}
+  .punch-btn:active{transform:scale(.96);}
+  .punch-btn i{font-size:40px;}
+  .punch-msg{margin:15px 0 0;font-size:12px;min-height:16px;color:var(--emc-cyan);}
+  .stat3{display:flex;gap:8px;}
+  .stat3>div{flex:1;text-align:center;background:var(--panel-2);border-radius:9px;padding:9px 4px;}
+  .stat3 .v{font-size:16px;font-weight:700;}
+  .stat3 .k{font-size:10.5px;color:var(--txt-2);margin-top:2px;}
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;}
+  .pill.good{background:var(--good-bg);color:#7ee2a8;}
+  .pill.warn{background:var(--warn-bg);color:var(--warn);}
+  .pill.bad{background:var(--bad-bg);color:#ff8a87;}
+  .pill.info{background:rgba(9,185,233,.12);color:var(--emc-cyan);}
+  .listrow{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .listrow:last-child{border-bottom:none;}
+  .listrow .ic{width:38px;height:38px;border-radius:10px;background:var(--panel-2);display:flex;align-items:center;justify-content:center;font-size:19px;color:var(--emc-cyan);flex:0 0 auto;}
+  .listrow .gr{flex:1;min-width:0;}
+  .listrow .t{font-size:14px;font-weight:500;}
+  .listrow .d{font-size:12px;color:var(--txt-2);margin-top:1px;}
+  .btn{display:flex;width:100%;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;padding:14px;border-radius:12px;background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));color:#04222b;margin-top:6px;}
+  .btn:active{transform:scale(.99);}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);}
+  .btn.sm{padding:10px;font-size:13px;}
+  .field{margin-bottom:13px;}
+  .field label{display:block;font-size:12px;color:var(--txt-2);margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--txt);font-family:inherit;font-size:14px;}
+  .seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;margin-bottom:13px;}
+  .seg button{flex:1;border:none;background:transparent;color:var(--txt-2);font-family:inherit;font-size:13px;font-weight:500;padding:9px;border-radius:8px;cursor:pointer;}
+  .seg button.on{background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));color:#04222b;font-weight:700;}
+  .lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--warn);background:var(--warn-bg);padding:3px 8px;border-radius:6px;}
+  .nav{display:flex;border-top:1px solid var(--line);background:var(--ink);flex:0 0 auto;}
+  .nav button{flex:1;border:none;background:transparent;color:var(--txt-3);font-family:inherit;padding:9px 0 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .nav button i{font-size:22px;}
+  .nav button span{font-size:10.5px;}
+  .nav button.on{color:var(--emc-cyan);}
+  .future-ribbon{background:var(--future-bg);border:1px solid #3a2f63;border-radius:12px;padding:11px 13px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;}
+  .future-ribbon i{color:var(--future);font-size:19px;flex:0 0 auto;margin-top:1px;}
+  .future-ribbon .t{font-size:13px;font-weight:700;color:#c9b8ff;}
+  .future-ribbon .d{font-size:12px;color:#9d8fc9;margin-top:2px;line-height:1.5;}
+  .badge-future{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.5px;background:var(--future-bg);color:#c9b8ff;border:1px solid #3a2f63;padding:3px 8px;border-radius:6px;}
+  .note{background:var(--panel-2);border-left:3px solid var(--emc-cyan);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;color:var(--txt-2);line-height:1.55;margin-bottom:12px;}
+  .note b{color:var(--txt);}
+  .toast{position:absolute;left:16px;right:16px;bottom:84px;z-index:50;background:var(--panel-3);border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13px;display:none;align-items:center;gap:10px;z-index:30;}
+  .toast.show{display:flex;}
+  .toast i{color:var(--good);font-size:20px;}
+  .ob{height:100%;display:flex;flex-direction:column;justify-content:center;padding:30px 24px;text-align:center;}
+  .ob .logo{width:64px;height:64px;border-radius:18px;margin:0 auto 20px;background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));display:flex;align-items:center;justify-content:center;color:#04222b;font-size:30px;font-weight:700;}
+  .ob h3{font-size:22px;font-weight:700;margin:0 0 8px;}
+  .ob p{color:var(--txt-2);font-size:14px;line-height:1.6;margin:0 0 26px;}
+  .consent{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:11px;display:flex;gap:11px;align-items:flex-start;}
+  .consent i{color:var(--emc-cyan);font-size:21px;flex:0 0 auto;margin-top:1px;}
+  .consent .t{font-size:13.5px;font-weight:500;}
+  .consent .d{font-size:12px;color:var(--txt-2);margin-top:2px;line-height:1.45;}
+  .consent .tg{width:42px;height:24px;border-radius:13px;background:var(--panel-3);flex:0 0 auto;position:relative;cursor:pointer;border:1px solid var(--line);}
+  .consent .tg.on{background:var(--emc-cyan);}
+  .consent .tg::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .15s;}
+  .consent .tg.on::after{left:20px;}
+</style>
+</head>
+<body>
+
+<div class="stage-intro">
+  <h1>EMC People Platform — Mobile UI/UX Prototype (v2)</h1>
+  <div class="brandbar"></div>
+  <p>Clickable reference for the development team. Brand: EMC cyan <code>#09B9E9 to #01FFFF</code>, Roboto, thinline icons. <b style="color:var(--txt)">Navigation (revised per UX review):</b> every screen has a top bar; drilling in shows a back chevron top-left that returns to where you actually came from; the logo taps to Home. Same pattern on both phones.</p>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--emc-cyan)"></i> Build now — Tier 1 + Tier 2 (v1)</span>
+    <span><i class="dot" style="background:var(--future)"></i> Future phase — design only, do not build backend yet</span>
+  </div>
+  <p style="margin-top:14px;"><b style="color:var(--txt)">Frozen contract (all clients, incl. mobile):</b> consume the existing v1.9.0 API endpoints, authenticate via Entra ID, re-derive all authority server-side. No parallel auth, no token-bearing action shortcut. A notification deep-links to the request; it never carries the authority to action it.</p>
+</div>
+
+<div class="phone" id="phone1">
+  <span class="phone-label">Employee app · v1 (build now)</span>
+  <div class="statusbar"><span>9:41</span><span class="r"><i class="ti ti-signal-4g"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+  <div class="screen" id="ob-screen">
+    <div class="view active" id="ob-1"><div class="ob">
+      <div class="logo">e</div>
+      <h3>EMC People Platform</h3>
+      <p>Sign in with your Emirates Mobility account to continue.</p>
+      <button class="btn" onclick="ob(2)"><i class="ti ti-brand-windows"></i> Sign in with Entra ID</button>
+      <p style="font-size:11px;color:var(--txt-3);margin:18px 0 0;">Authentication is handled by your organization's Microsoft Entra ID. No separate password.</p>
+    </div></div>
+    <div class="view" id="ob-2"><div class="ob">
+      <div class="logo"><i class="ti ti-device-mobile-check"></i></div>
+      <h3>Register this device</h3>
+      <p>This device will be linked to your account so attendance punches can be attributed to you.</p>
+      <div class="consent"><i class="ti ti-device-mobile"></i><div style="flex:1"><div class="t">iPhone · Ahmed's device</div><div class="d">First sign-in on this device</div></div></div>
+      <button class="btn" onclick="ob(3)">Register device</button>
+      <button class="btn ghost sm" onclick="ob(3)" style="margin-top:8px;">Skip for now</button>
+    </div></div>
+    <div class="view" id="ob-3"><div class="ob">
+      <div class="logo"><i class="ti ti-shield-check"></i></div>
+      <h3>Permissions</h3>
+      <p>Each is optional and can be changed later. We only use these for the features you turn on.</p>
+      <div class="consent"><i class="ti ti-map-pin"></i><div style="flex:1"><div class="t">Location</div><div class="d">Used only at the moment you punch, to check you're on-site. Not tracked continuously.</div></div><div class="tg on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="consent"><i class="ti ti-face-id"></i><div style="flex:1"><div class="t">Face / biometric</div><div class="d">On-device check only. The image never leaves your phone — only a match result is sent.</div></div><div class="tg on" onclick="this.classList.toggle('on')"></div></div>
+      <div class="consent"><i class="ti ti-bell"></i><div style="flex:1"><div class="t">Notifications</div><div class="d">Approval decisions, reminders, corrections.</div></div><div class="tg on" onclick="this.classList.toggle('on')"></div></div>
+      <button class="btn" onclick="finishOb()">Continue</button>
+      <p style="font-size:11px;color:var(--txt-3);margin:14px 0 0;">See the full privacy and location statement any time under More.</p>
+    </div></div>
+  </div>
+
+  <div id="app1" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div class="topbar">
+      <div class="lead" id="back1" onclick="back1()" style="display:none;"><i class="ti ti-arrow-left"></i></div>
+      <div class="lead" id="logo1" onclick="goHome1()" title="Home"><div class="mark">e</div></div>
+      <div class="ttl" id="ttl1"></div>
+      <div class="bell" onclick="drill1('v-notif')"><i class="ti ti-bell"></i><span class="badge">3</span></div>
+    </div>
+    <div class="screen" id="screen1">
+
+      <div class="view active" id="v-home"><div class="pad">
+        <h2 class="title">Good morning, Ahmed</h2>
+        <p class="sub">Tuesday, 30 June 2026</p>
+        <div class="punch-wrap">
+          <p class="punch-state">You're currently</p>
+          <p class="punch-big" id="pBig">Checked out</p>
+          <button class="punch-btn" id="pBtn" onclick="punch()"><i class="ti ti-fingerprint" id="pIcon"></i><span id="pLbl">Check in</span></button>
+          <p class="punch-msg" id="pMsg"></p>
+        </div>
+        <div class="card">
+          <div class="row" style="margin-bottom:11px;"><b style="font-size:14px;">Today</b><span class="muted">Tue 30 Jun</span></div>
+          <div class="stat3"><div><div class="v" id="hIn">—</div><div class="k">First in</div></div><div><div class="v" id="hOut">—</div><div class="k">Last out</div></div><div><div class="v" id="hHrs">0.0</div><div class="k">Hours</div></div></div>
+        </div>
+        <div class="card tap" onclick="drill1('v-leave')">
+          <div class="row" style="margin-bottom:11px;"><b style="font-size:14px;">Leave balance</b><i class="ti ti-chevron-right chev"></i></div>
+          <div class="stat3"><div><div class="v">18</div><div class="k">Annual</div></div><div><div class="v">6</div><div class="k">Sick</div></div><div><div class="v">4h</div><div class="k">Short</div></div></div>
+        </div>
+        <div class="card tap" id="home-attention" onclick="drill1('v-day')" style="border-color:#3a3010;background:var(--warn-bg);">
+          <div class="row"><div style="display:flex;gap:11px;align-items:center;"><i class="ti ti-alert-triangle" style="color:var(--warn);font-size:21px;"></i><div><div style="font-size:13.5px;font-weight:500;color:var(--warn);" id="home-att-t">1 missing punch</div><div style="font-size:12px;color:#c79a3a;" id="home-att-d">Mon 29 Jun needs a correction</div></div></div><i class="ti ti-chevron-right" style="color:var(--warn);font-size:18px;"></i></div>
+        </div>
+      </div></div>
+
+      <div class="view" id="v-att"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Your records. Tap a day for detail.</p>
+        <div class="card" style="padding:6px 14px;">
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-calendar"></i></div><div class="gr"><div class="t">Tue 30 Jun</div><div class="d">08:12 in · still on-site</div></div><span class="pill info">Open</span></div>
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-calendar"></i></div><div class="gr"><div class="t">Mon 29 Jun</div><div class="d" id="mon29-sub">No check-out recorded</div></div><span class="pill warn" id="mon29-pill">Missing</span></div>
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-calendar"></i></div><div class="gr"><div class="t">Sun 28 Jun</div><div class="d">08:03 in · 17:31 out</div></div><span class="pill good">9.5h</span></div>
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-calendar"></i></div><div class="gr"><div class="t">Thu 25 Jun</div><div class="d">08:20 in · 16:58 out · flagged off-site</div></div><span class="pill bad">Flagged</span></div>
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-calendar"></i></div><div class="gr"><div class="t">Wed 24 Jun</div><div class="d">07:58 in · 17:10 out</div></div><span class="pill good">9.2h</span></div>
+        </div>
+        <button class="btn ghost" onclick="drill1('v-corr')"><i class="ti ti-edit"></i> Request a correction</button>
+      </div></div>
+
+      <div class="view" id="v-day"><div class="pad">
+        <div class="card" id="day-ban-card" style="border-color:#3a3010;background:var(--warn-bg);margin-top:4px;">
+          <div style="display:flex;gap:10px;"><i class="ti ti-alert-triangle" id="day-ban-ic" style="color:var(--warn);font-size:20px;"></i><div><div style="font-weight:500;color:var(--warn);font-size:14px;" id="day-ban-t">Missing check-out</div><div style="font-size:12.5px;color:#c79a3a;margin-top:3px;" id="day-ban-d">You checked in at 08:09 but no check-out was recorded. Request a correction to fix your hours.</div></div></div>
+        </div>
+        <div class="card">
+          <div class="row" style="padding:6px 0;border-bottom:1px solid var(--line);"><span class="muted">Check in</span><b>08:09 · EMC HQ</b></div>
+          <div class="row" style="padding:6px 0;border-bottom:1px solid var(--line);"><span class="muted">Check out</span><b style="color:var(--warn);" id="day-co">— missing</b></div>
+          <div class="row" style="padding:6px 0;"><span class="muted">Recorded hours</span><b>—</b></div>
+        </div>
+        <button class="btn" onclick="drill1('v-corr')"><i class="ti ti-edit"></i> Request correction</button>
+      </div></div>
+
+      <div class="view" id="v-corr"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Goes to your manager for approval.</p>
+        <div class="field"><label>Date</label><input value="Mon 29 Jun 2026" readonly></div>
+        <div class="field"><label>What needs fixing</label><select><option>Missing check-out</option><option>Missing check-in</option><option>Wrong time</option><option>Off-site flag dispute</option></select></div>
+        <div class="field"><label>Correct check-out time</label><input value="17:24" type="time"></div>
+        <div class="field"><label>Reason (manager sees this)</label><textarea rows="3">Forgot to check out before leaving site.</textarea></div>
+        <button class="btn" onclick="submitFlow('Correction submitted for approval','v-att')">Submit for approval</button>
+      </div></div>
+
+      <div class="view" id="v-leave"><div class="pad">
+        <div class="card" style="margin-top:4px;">
+          <div class="sec-label" style="margin:0 0 9px;">BALANCES</div>
+          <div class="stat3"><div><div class="v">18</div><div class="k">Annual days</div></div><div><div class="v">6</div><div class="k">Sick days</div></div><div><div class="v">4h</div><div class="k">Short leave</div></div></div>
+        </div>
+        <button class="btn" onclick="drill1('v-leavereq')"><i class="ti ti-plus"></i> Request leave</button>
+        <div class="sec-label">RECENT REQUESTS</div>
+        <div class="card" style="padding:6px 14px;" id="leave-list">
+          <div class="listrow"><div class="ic"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Annual · 2 days</div><div class="d">12–13 Jul · with Thomas Hayward</div></div><span class="pill warn">Pending</span></div>
+          <div class="listrow"><div class="ic"><i class="ti ti-clock"></i></div><div class="gr"><div class="t">Short leave · 2h</div><div class="d">28 Jun, 14:00–16:00</div></div><span class="pill good">Approved</span></div>
+          <div class="listrow"><div class="ic"><i class="ti ti-heartbeat"></i></div><div class="gr"><div class="t">Sick · 1 day</div><div class="d">19 Jun</div></div><span class="pill good">Approved</span></div>
+          <div class="listrow"><div class="ic"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Annual · 3 days</div><div class="d">2–4 Jun</div></div><span class="pill bad">Rejected</span></div>
+        </div>
+      </div></div>
+
+      <div class="view" id="v-leavereq"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Choose duration type, then dates.</p>
+        <div class="field"><label>Leave type</label><select><option>Annual</option><option>Sick</option><option>Short leave</option><option>Unpaid</option></select></div>
+        <label style="display:block;font-size:12px;color:var(--txt-2);margin-bottom:5px;">Duration</label>
+        <div class="seg"><button class="on" onclick="segp(this,'whole')">Whole day</button><button onclick="segp(this,'half')">Half day</button><button onclick="segp(this,'hours')">Hours</button></div>
+        <div id="dur-whole"><div class="field"><label>From</label><input type="date" value="2026-07-12"></div><div class="field"><label>To</label><input type="date" value="2026-07-13"></div></div>
+        <div id="dur-half" style="display:none;"><div class="field"><label>Date</label><input type="date" value="2026-07-12"></div><div class="field"><label>Which half</label><select><option>Morning</option><option>Afternoon</option></select></div></div>
+        <div id="dur-hours" style="display:none;"><div class="field"><label>Date</label><input type="date" value="2026-07-12"></div><div class="row" style="gap:10px;"><div class="field" style="flex:1;"><label>From</label><input type="time" value="14:00"></div><div class="field" style="flex:1;"><label>To</label><input type="time" value="16:00"></div></div></div>
+        <div class="field"><label>Note (optional)</label><textarea rows="2"></textarea></div>
+        <div class="note"><b>Routes to your line manager</b> (Thomas Hayward) for approval. You'll be notified of the decision. Authority is enforced server-side.</div>
+        <button class="btn" onclick="submitFlow('Leave request submitted','v-leave')">Submit request</button>
+      </div></div>
+
+      <div class="view" id="v-notif"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Tap to open the related request.</p>
+        <div class="card" style="padding:6px 14px;">
+          <div class="listrow" onclick="drill1('v-leave')"><div class="ic"><i class="ti ti-circle-check"></i></div><div class="gr"><div class="t">Short leave approved</div><div class="d">Thomas Hayward · 28 Jun</div></div></div>
+          <div class="listrow" onclick="drill1('v-day')"><div class="ic"><i class="ti ti-alert-triangle"></i></div><div class="gr"><div class="t">Correction needs your attention</div><div class="d">Mon 29 Jun missing punch · today</div></div></div>
+          <div class="listrow" onclick="drill1('v-leave')"><div class="ic"><i class="ti ti-clock"></i></div><div class="gr"><div class="t">Leave request pending</div><div class="d">12–13 Jul · awaiting manager</div></div></div>
+        </div>
+        <div class="note"><b>Actionable, but not token-bearing.</b> Opening a notification navigates to the request inside the authenticated app. The action commits through the server, which re-checks who you are. A forwarded notification cannot action anything.</div>
+      </div></div>
+
+      <div class="view" id="v-more"><div class="pad">
+        <div class="card" style="display:flex;gap:13px;align-items:center;margin-top:4px;">
+          <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--emc-cyan),var(--emc-aqua));display:flex;align-items:center;justify-content:center;color:#04222b;font-weight:700;">AM</div>
+          <div><div style="font-weight:500;">Ahmed Al Mansoori</div><div class="muted">Middleware Specialist · IT</div></div>
+        </div>
+        <div class="sec-label">ACCOUNT</div>
+        <div class="card tap" onclick="drill1('v-profile')"><div class="row"><span><i class="ti ti-user" style="color:var(--emc-cyan);margin-right:9px;"></i>My profile</span><i class="ti ti-chevron-right chev"></i></div></div>
+        <div class="card tap" onclick="toast1('Notification preferences')"><div class="row"><span><i class="ti ti-bell" style="color:var(--emc-cyan);margin-right:9px;"></i>Notification preferences</span><i class="ti ti-chevron-right chev"></i></div></div>
+        <div class="sec-label">PRIVACY</div>
+        <div class="card tap" onclick="drill1('v-privacy')"><div class="row"><span><i class="ti ti-shield-lock" style="color:var(--emc-cyan);margin-right:9px;"></i>Privacy & location statement</span><i class="ti ti-chevron-right chev"></i></div></div>
+        <div class="card tap" onclick="toast1('Help & support')"><div class="row"><span><i class="ti ti-help-circle" style="color:var(--emc-cyan);margin-right:9px;"></i>Help & support</span><i class="ti ti-chevron-right chev"></i></div></div>
+        <div class="card"><div class="row"><span class="muted">App version</span><span class="muted">1.0 (prototype)</span></div></div>
+        <button class="btn ghost" onclick="signout()"><i class="ti ti-logout"></i> Sign out</button>
+      </div></div>
+
+      <div class="view" id="v-profile"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Your record in Core HR.</p>
+        <div class="sec-label" style="margin-top:6px;">EDITABLE</div>
+        <div class="field"><label>Mobile number</label><input value="+971 50 123 4567"></div>
+        <div class="field"><label>Personal email</label><input value="ahmed@example.com"></div>
+        <div class="field"><label>Emergency contact</label><input value="Sara · +971 50 765 4321"></div>
+        <div class="field"><label>Address</label><input value="Abu Dhabi, UAE"></div>
+        <button class="btn sm" onclick="toast1('Profile changes saved')">Save changes</button>
+        <div class="sec-label">VERIFICATION REQUIRED</div>
+        <div class="card">
+          <div class="row" style="margin-bottom:8px;"><b style="font-size:14px;">Bank / IBAN</b><span class="lock"><i class="ti ti-lock"></i> Verified change</span></div>
+          <div class="muted" style="margin-bottom:10px;line-height:1.5;">Changing where your salary is paid is sensitive. It does not take effect immediately — it goes through verification and approval before payroll uses it.</div>
+          <div class="field"><label>IBAN</label><input value="AE•• •••• •••• •••• 4821" readonly></div>
+          <button class="btn ghost sm" onclick="toast1('Bank change request sent for verification')">Request bank detail change</button>
+        </div>
+        <div class="note"><b>Design note for devs:</b> low-sensitivity fields save directly; bank/IBAN must route through verification + approval, never a silent self-edit — it is a payroll-redirection risk.</div>
+      </div></div>
+
+      <div class="view" id="v-privacy"><div class="pad">
+        <p class="sub" style="margin-top:2px;">Plain language. Required under PDPL.</p>
+        <div class="card" style="margin-top:4px;"><div style="font-weight:500;margin-bottom:6px;"><i class="ti ti-map-pin" style="color:var(--emc-cyan);margin-right:7px;"></i>Location</div><div class="muted" style="line-height:1.6;">We read your location only at the moment you punch in or out, to check whether you are on-site. We do not track you continuously and we do not keep a location history beyond the punch record.</div></div>
+        <div class="card"><div style="font-weight:500;margin-bottom:6px;"><i class="ti ti-face-id" style="color:var(--emc-cyan);margin-right:7px;"></i>Face / biometric</div><div class="muted" style="line-height:1.6;">Face matching happens on your device. The image never leaves your phone. Only the yes/no match result is sent.</div></div>
+        <div class="card"><div style="font-weight:500;margin-bottom:6px;"><i class="ti ti-database" style="color:var(--emc-cyan);margin-right:7px;"></i>Your data</div><div class="muted" style="line-height:1.6;">You can withdraw any permission under More at any time. Withdrawing a permission disables the feature that uses it.</div></div>
+      </div></div>
+
+    </div>
+
+    <div class="toast" id="toast1"><i class="ti ti-circle-check"></i><span id="toast1txt"></span></div>
+
+    <div class="nav">
+      <button class="on" data-v="v-home" onclick="tab1('v-home')"><i class="ti ti-home"></i><span>Home</span></button>
+      <button data-v="v-att" onclick="tab1('v-att')"><i class="ti ti-clock"></i><span>Attendance</span></button>
+      <button data-v="v-leave" onclick="tab1('v-leave')"><i class="ti ti-calendar"></i><span>Leave</span></button>
+      <button data-v="v-more" onclick="tab1('v-more')"><i class="ti ti-dots"></i><span>More</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="phone" id="phone2">
+  <span class="phone-label" style="color:var(--future);">Future phase · design only</span>
+  <div class="statusbar"><span>9:41</span><span class="r"><i class="ti ti-signal-4g"></i><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></span></div>
+  <div class="topbar">
+    <div class="lead" id="back2" onclick="back2()" style="display:none;"><i class="ti ti-arrow-left"></i></div>
+    <div class="lead" id="logo2" onclick="goMenu2()" title="Roadmap home"><div class="mark" style="background:linear-gradient(135deg,var(--future),#c9b8ff);">e</div></div>
+    <div class="ttl" id="ttl2"></div>
+    <span class="badge-future" style="flex:0 0 auto;"><i class="ti ti-flask"></i> FUTURE</span>
+  </div>
+  <div class="screen" id="screen2">
+
+    <div class="view active" id="f-menu"><div class="pad">
+      <div class="future-ribbon" style="margin-top:4px;"><i class="ti ti-info-circle"></i><div><div class="t">Future phase — design only</div><div class="d">These screens show direction for stakeholders. Do not build backend during this phase. Each needs its own spec before development.</div></div></div>
+      <div class="sec-label" style="margin-top:4px;">EMPLOYEE — NEXT</div>
+      <div class="card tap" onclick="drill2('f-payslip')"><div class="row"><span><i class="ti ti-cash" style="color:var(--future);margin-right:9px;"></i>Payslips</span><span class="badge-future">Design</span></div></div>
+      <div class="card tap" onclick="drill2('f-docs')"><div class="row"><span><i class="ti ti-files" style="color:var(--future);margin-right:9px;"></i>Documents</span><span class="badge-future">Design</span></div></div>
+      <div class="card tap" onclick="drill2('f-dir')"><div class="row"><span><i class="ti ti-users" style="color:var(--future);margin-right:9px;"></i>Directory / org chart</span><span class="badge-future">Design</span></div></div>
+      <div class="sec-label">MANAGER</div>
+      <div class="card tap" onclick="drill2('f-mgr')"><div class="row"><span><i class="ti ti-checklist" style="color:var(--future);margin-right:9px;"></i>Approvals with context</span><span class="badge-future">Design</span></div></div>
+      <div class="sec-label">ASSISTANT</div>
+      <div class="card tap" onclick="drill2('f-ai')"><div class="row"><span><i class="ti ti-sparkles" style="color:var(--future);margin-right:9px;"></i>AI assistant (voice / agentic)</span><span class="badge-future">Design</span></div></div>
+    </div></div>
+
+    <!-- PAYSLIPS list -->
+    <div class="view" id="f-payslip"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Tap a month for the breakdown.</p>
+      <div class="card" style="background:rgba(167,139,250,.10);border-color:#3a2f63;">
+        <div class="sec-label" style="margin:0 0 8px;">YEAR TO DATE · 2026</div>
+        <div class="stat3"><div><div class="v">114,000</div><div class="k">Gross AED</div></div><div><div class="v">3,600</div><div class="k">Deductions</div></div><div><div class="v" style="color:#c9b8ff;">110,400</div><div class="k">Net AED</div></div></div>
+      </div>
+      <div class="card" style="padding:6px 14px;">
+        <div class="listrow" onclick="drill2('f-payslip-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-file-dollar"></i></div><div class="gr"><div class="t">June 2026</div><div class="d">Net AED 18,400</div></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="listrow" onclick="drill2('f-payslip-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-file-dollar"></i></div><div class="gr"><div class="t">May 2026</div><div class="d">Net AED 18,400</div></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="listrow" onclick="drill2('f-payslip-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-file-dollar"></i></div><div class="gr"><div class="t">April 2026</div><div class="d">Net AED 18,400</div></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+      <div class="future-ribbon"><i class="ti ti-lock"></i><div><div class="t">Needs its own spec</div><div class="d">Payslips expose payroll figures. Authorization, masking, and document security must be designed before backend work.</div></div></div>
+    </div></div>
+
+    <!-- PAYSLIP detail -->
+    <div class="view" id="f-payslip-detail"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Payslip · June 2026</p>
+      <div class="card">
+        <div class="sec-label" style="margin:0 0 8px;">EARNINGS</div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Basic salary</span><b>AED 12,000</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Housing allowance</span><b>AED 5,000</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Transport allowance</span><b>AED 2,000</b></div>
+        <div class="row" style="padding:8px 0 2px;border-top:1px solid var(--line);margin-top:6px;"><b>Gross</b><b>AED 19,000</b></div>
+      </div>
+      <div class="card">
+        <div class="sec-label" style="margin:0 0 8px;">DEDUCTIONS</div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Pension (GPSSA 5%)</span><b>AED 600</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Unpaid leave</span><b>AED 0</b></div>
+        <div class="row" style="padding:8px 0 2px;border-top:1px solid var(--line);margin-top:6px;"><b>Total deductions</b><b>AED 600</b></div>
+      </div>
+      <div class="card" style="background:rgba(167,139,250,.12);border-color:#3a2f63;">
+        <div class="row"><b style="font-size:15px;">Net pay</b><b style="font-size:18px;color:#c9b8ff;">AED 18,400</b></div>
+        <div class="muted" style="margin-top:3px;">Paid 25 Jun 2026 · AE•• •••• 4821</div>
+      </div>
+      <button class="btn ghost" onclick="toast2('Payslip PDF (design only)')"><i class="ti ti-download"></i> Download PDF</button>
+    </div></div>
+
+    <!-- DOCUMENTS categories -->
+    <div class="view" id="f-docs"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Browse by category.</p>
+      <div class="card tap" onclick="drill2('f-docs-list')"><div class="row"><span><i class="ti ti-file-certificate" style="color:var(--future);margin-right:9px;"></i>Salary certificates</span><span class="muted">3 ›</span></div></div>
+      <div class="card tap" onclick="drill2('f-docs-list')"><div class="row"><span><i class="ti ti-file-text" style="color:var(--future);margin-right:9px;"></i>Employment letters</span><span class="muted">2 ›</span></div></div>
+      <div class="card tap" onclick="drill2('f-docs-list')"><div class="row"><span><i class="ti ti-files" style="color:var(--future);margin-right:9px;"></i>Contracts</span><span class="muted">1 ›</span></div></div>
+      <button class="btn ghost" onclick="drill2('f-doc-request')"><i class="ti ti-plus"></i> Request a document</button>
+    </div></div>
+
+    <!-- DOCUMENT request -->
+    <div class="view" id="f-doc-request"><div class="pad">
+      <p class="sub" style="margin-top:2px;">HR issues the document to your Documents.</p>
+      <div class="field"><label>Document type</label><select><option>Salary certificate</option><option>Salary certificate (for bank)</option><option>Employment / NOC letter</option><option>Experience certificate</option></select></div>
+      <div class="field"><label>Addressed to (optional)</label><input placeholder="e.g. Emirates NBD"></div>
+      <div class="field"><label>Note (optional)</label><textarea rows="2"></textarea></div>
+      <button class="btn" onclick="toast2('Document request sent to HR (design only)')">Submit request</button>
+      <div class="future-ribbon" style="margin-top:14px;"><i class="ti ti-info-circle"></i><div><div class="t">Routes to HR</div><div class="d">The issued document returns into the employee's Documents, generated server-side from verified record data.</div></div></div>
+    </div></div>
+
+    <!-- DOCUMENTS list within a category -->
+    <div class="view" id="f-docs-list"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Salary certificates</p>
+      <div class="card" style="padding:6px 14px;">
+        <div class="listrow" onclick="drill2('f-doc-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-file-certificate"></i></div><div class="gr"><div class="t">Salary certificate</div><div class="d">Issued 12 Jun 2026 · PDF</div></div><i class="ti ti-chevron-right chev"></i></div>
+        <div class="listrow" onclick="drill2('f-doc-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-file-certificate"></i></div><div class="gr"><div class="t">Salary certificate (bank)</div><div class="d">Issued 3 Mar 2026 · PDF</div></div><i class="ti ti-chevron-right chev"></i></div>
+      </div>
+    </div></div>
+
+    <!-- DOCUMENT detail -->
+    <div class="view" id="f-doc-detail"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Salary certificate</p>
+      <div class="card" style="height:180px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--txt-3);">
+        <i class="ti ti-file-certificate" style="font-size:42px;color:var(--future);"></i>
+        <span class="muted">Document preview</span>
+      </div>
+      <div class="card">
+        <div class="row" style="padding:5px 0;"><span class="muted">Type</span><b>Salary certificate</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Issued</span><b>12 Jun 2026</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Format</span><b>PDF · 142 KB</b></div>
+      </div>
+      <button class="btn ghost" onclick="toast2('Document download (design only)')"><i class="ti ti-download"></i> Download</button>
+    </div></div>
+
+    <!-- DIRECTORY + ORG CHART -->
+    <div class="view" id="f-dir"><div class="pad">
+      <div class="seg" style="margin-top:2px;"><button class="on" id="dir-seg-list" onclick="dirView('list')">Directory</button><button id="dir-seg-org" onclick="dirView('org')">Org chart</button></div>
+
+      <div id="dir-list">
+        <div class="field" style="margin-bottom:10px;"><input id="dir-search" placeholder="Search people…" oninput="dirFilter()"></div>
+        <div class="card" style="padding:6px 14px;" id="dir-people">
+          <div class="listrow" data-n="thomas hayward" onclick="drill2('f-person')"><div class="ic" style="color:var(--future)"><i class="ti ti-user"></i></div><div class="gr"><div class="t">Thomas Hayward</div><div class="d">Manager · IT</div></div><i class="ti ti-chevron-right chev"></i></div>
+          <div class="listrow" data-n="emily drake" onclick="drill2('f-person')"><div class="ic" style="color:var(--future)"><i class="ti ti-user"></i></div><div class="gr"><div class="t">Emily Drake</div><div class="d">Supervisor · IT</div></div><i class="ti ti-chevron-right chev"></i></div>
+          <div class="listrow" data-n="ahmed al mansoori" onclick="drill2('f-person')"><div class="ic" style="color:var(--future)"><i class="ti ti-user"></i></div><div class="gr"><div class="t">Ahmed Al Mansoori</div><div class="d">Middleware Specialist · IT</div></div><i class="ti ti-chevron-right chev"></i></div>
+          <div class="listrow" data-n="hannah frost" onclick="drill2('f-person')"><div class="ic" style="color:var(--future)"><i class="ti ti-user"></i></div><div class="gr"><div class="t">Hannah Frost</div><div class="d">Specialist · IT</div></div><i class="ti ti-chevron-right chev"></i></div>
+        </div>
+      </div>
+
+      <div id="dir-org" style="display:none;">
+        <div class="card">
+          <div class="org-node" style="padding:6px 0;"><div class="row" onclick="orgToggle('o1')" style="cursor:pointer;"><span><i class="ti ti-user" style="color:var(--future);margin-right:8px;"></i><b>Thomas Hayward</b> · Manager</span><i class="ti ti-chevron-down chev" id="o1-c"></i></div>
+            <div id="o1" style="margin-left:16px;border-left:1px solid var(--line);padding-left:12px;margin-top:6px;">
+              <div class="row" onclick="orgToggle('o2')" style="cursor:pointer;padding:6px 0;"><span><i class="ti ti-user" style="color:var(--future);margin-right:8px;"></i>Emily Drake · Supervisor</span><i class="ti ti-chevron-down chev" id="o2-c"></i></div>
+              <div id="o2" style="margin-left:16px;border-left:1px solid var(--line);padding-left:12px;">
+                <div style="padding:6px 0;"><i class="ti ti-user" style="color:var(--future);margin-right:8px;"></i>Ahmed Al Mansoori</div>
+                <div style="padding:6px 0;"><i class="ti ti-user" style="color:var(--future);margin-right:8px;"></i>Hannah Frost</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="future-ribbon"><i class="ti ti-bulb"></i><div><div class="t">Org chart</div><div class="d">Tap a node to expand or collapse. Real version reads the live hierarchy used by approval routing.</div></div></div>
+      </div>
+    </div></div>
+
+    <!-- PERSON card -->
+    <div class="view" id="f-person"><div class="pad">
+      <div class="card" style="display:flex;gap:13px;align-items:center;margin-top:4px;">
+        <div style="width:50px;height:50px;border-radius:50%;background:var(--future);display:flex;align-items:center;justify-content:center;color:#1e1830;font-weight:700;">TH</div>
+        <div><div style="font-weight:500;font-size:15px;">Thomas Hayward</div><div class="muted">Manager · Information Technology</div></div>
+      </div>
+      <div class="row" style="gap:8px;">
+        <button class="btn sm" style="flex:1;" onclick="toast2('Open email (design only)')"><i class="ti ti-mail"></i> Email</button>
+        <button class="btn ghost sm" style="flex:1;" onclick="toast2('Call extension (design only)')"><i class="ti ti-phone"></i> Call</button>
+      </div>
+      <div class="card">
+        <div class="row" style="padding:6px 0;border-bottom:1px solid var(--line);"><span class="muted"><i class="ti ti-mail" style="margin-right:7px;color:var(--future);"></i>Email</span><b style="font-size:13px;">t.hayward@example.com</b></div>
+        <div class="row" style="padding:6px 0;border-bottom:1px solid var(--line);"><span class="muted"><i class="ti ti-phone" style="margin-right:7px;color:var(--future);"></i>Extension</span><b>4021</b></div>
+        <div class="row" style="padding:6px 0;"><span class="muted"><i class="ti ti-users" style="margin-right:7px;color:var(--future);"></i>Reports to</span><b>George Wright</b></div>
+      </div>
+      <div class="future-ribbon"><i class="ti ti-info-circle"></i><div><div class="t">Person card</div><div class="d">Contact details and reporting line. What is shown is governed by directory visibility rules, designed later.</div></div></div>
+    </div></div>
+
+    <!-- MANAGER approval queue -->
+    <div class="view" id="f-mgr"><div class="pad">
+      <div class="seg" style="margin-top:2px;"><button class="on" id="mgr-seg-p" onclick="mgrView('p')">Pending (3)</button><button id="mgr-seg-d" onclick="mgrView('d')">Decided</button></div>
+      <div id="mgr-pending">
+        <div class="card" style="padding:6px 14px;">
+          <div class="listrow" onclick="drill2('f-mgr-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Ahmed — annual, 2 days</div><div class="d">12–13 Jul · family travel</div></div><span class="pill warn">Pending</span></div>
+          <div class="listrow" onclick="drill2('f-mgr-corr')"><div class="ic" style="color:var(--future)"><i class="ti ti-edit"></i></div><div class="gr"><div class="t">Hannah — correction</div><div class="d">Missing punch, 29 Jun</div></div><span class="pill warn">Pending</span></div>
+          <div class="listrow" onclick="drill2('f-mgr-detail')"><div class="ic" style="color:var(--future)"><i class="ti ti-clock"></i></div><div class="gr"><div class="t">Emily — short leave, 2h</div><div class="d">3 Jul, 14:00–16:00</div></div><span class="pill warn">Pending</span></div>
+        </div>
+      </div>
+      <div id="mgr-decided" style="display:none;">
+        <div class="card" style="padding:6px 14px;">
+          <div class="listrow"><div class="ic" style="color:var(--future)"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Ahmed — annual, 1 day</div><div class="d">2 Jun · approved 28 May</div></div><span class="pill good">Approved</span></div>
+          <div class="listrow"><div class="ic" style="color:var(--future)"><i class="ti ti-heartbeat"></i></div><div class="gr"><div class="t">Hannah — sick, 1 day</div><div class="d">19 Jun · approved</div></div><span class="pill good">Approved</span></div>
+          <div class="listrow"><div class="ic" style="color:var(--future)"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Ahmed — annual, 3 days</div><div class="d">2–4 Jun · returned</div></div><span class="pill bad">Returned</span></div>
+        </div>
+      </div>
+    </div></div>
+
+    <!-- MANAGER approval detail (context panel) -->
+    <div class="view" id="f-mgr-detail"><div class="pad">
+      <div class="card" style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--future);display:flex;align-items:center;justify-content:center;color:#1e1830;font-weight:700;">A</div>
+        <div><div style="font-weight:500;">Ahmed Al Mansoori</div><div class="muted">Annual leave · 2 days</div></div>
+      </div>
+      <div class="card">
+        <div class="sec-label" style="margin:0 0 8px;">CONTEXT</div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Dates</span><b>12–13 Jul 2026</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Balance after</span><b>16 days</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Team coverage</span><b style="color:#7ee2a8;">No clash</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Reason</span><b>Family travel</b></div>
+      </div>
+      <div class="row" style="gap:8px;"><button class="btn sm" style="flex:1;" onclick="toast2('Approved (design only)')">Approve</button><button class="btn ghost sm" style="flex:1;" onclick="toast2('Returned (design only)')">Return</button></div>
+      <button class="btn ghost sm" style="margin-top:8px;color:#ff8a87;border-color:#5a2a2a;" onclick="toast2('Rejected (design only)')">Reject</button>
+      <div class="future-ribbon" style="margin-top:14px;"><i class="ti ti-bulb"></i><div><div class="t">Context, not just buttons</div><div class="d">The manager sees balance impact, team coverage, and reason before deciding. Actions commit through the authenticated workflow endpoints, server-enforced.</div></div></div>
+    </div></div>
+
+    <!-- MANAGER correction approval detail -->
+    <div class="view" id="f-mgr-corr"><div class="pad">
+      <div class="card" style="display:flex;gap:12px;align-items:center;margin-top:4px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--future);display:flex;align-items:center;justify-content:center;color:#1e1830;font-weight:700;">H</div>
+        <div><div style="font-weight:500;">Hannah Frost</div><div class="muted">Attendance correction</div></div>
+      </div>
+      <div class="card">
+        <div class="sec-label" style="margin:0 0 8px;">WHAT CHANGED</div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Date</span><b>Mon 29 Jun 2026</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Recorded</span><b style="color:var(--warn);">No check-out</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Requested</span><b style="color:var(--emc-cyan);">Check-out 17:24</b></div>
+        <div class="row" style="padding:5px 0;"><span class="muted">Reason given</span><b>Forgot to punch out</b></div>
+      </div>
+      <div class="row" style="gap:8px;"><button class="btn sm" style="flex:1;" onclick="toast2('Correction approved (design only)')">Approve</button><button class="btn ghost sm" style="flex:1;" onclick="toast2('Returned (design only)')">Return</button></div>
+      <div class="future-ribbon" style="margin-top:14px;"><i class="ti ti-bulb"></i><div><div class="t">Correction = before/after</div><div class="d">A correction approval shows the recorded value against the requested value, so the manager approves a specific change, not a blank form.</div></div></div>
+    </div></div>
+
+    <!-- AI assistant -->
+    <div class="view" id="f-ai"><div class="pad">
+      <p class="sub" style="margin-top:2px;">Voice / agentic · future phase</p>
+      <div class="card" style="background:var(--panel-2);">
+        <div style="display:flex;gap:9px;margin-bottom:12px;"><div style="width:30px;height:30px;border-radius:50%;background:var(--future);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#1e1830;"><i class="ti ti-sparkles"></i></div><div style="background:var(--panel-3);border-radius:12px;padding:9px 12px;font-size:13px;">Hi Ahmed, how can I help?</div></div>
+        <div style="display:flex;gap:9px;margin-bottom:12px;justify-content:flex-end;"><div style="background:rgba(167,139,250,.18);border-radius:12px;padding:9px 12px;font-size:13px;">"Request annual leave for next Thursday"</div></div>
+        <div style="display:flex;gap:9px;"><div style="width:30px;height:30px;border-radius:50%;background:var(--future);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#1e1830;"><i class="ti ti-sparkles"></i></div><div style="background:var(--panel-3);border-radius:12px;padding:9px 12px;font-size:13px;">I'll request <b>annual leave, Thu 3 Jul, 1 day</b>. Confirm to submit?<div style="display:flex;gap:7px;margin-top:9px;"><span class="pill info" style="cursor:pointer;" onclick="toast2('Submitted via authenticated endpoint (design only)')">Confirm</span><span class="pill bad" style="cursor:pointer;">Cancel</span></div></div></div>
+      </div>
+      <div style="display:flex;gap:9px;margin:12px 0;justify-content:flex-end;"><div style="background:rgba(167,139,250,.18);border-radius:12px;padding:9px 12px;font-size:13px;">"How many annual days do I have left?"</div></div>
+      <div style="display:flex;gap:9px;margin-bottom:4px;"><div style="width:30px;height:30px;border-radius:50%;background:var(--future);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#1e1830;"><i class="ti ti-sparkles"></i></div><div style="background:var(--panel-3);border-radius:12px;padding:9px 12px;font-size:13px;">You have <b>18 annual days</b> remaining, plus 6 sick days. A read-only answer — nothing is changed.</div></div>
+
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 12px;">
+        <span class="badge-future" style="cursor:pointer;background:var(--panel-2);color:var(--txt-2);border-color:var(--line);" onclick="toast2('Suggested intent (design only)')">My balance</span>
+        <span class="badge-future" style="cursor:pointer;background:var(--panel-2);color:var(--txt-2);border-color:var(--line);" onclick="toast2('Suggested intent (design only)')">Where's my correction?</span>
+        <span class="badge-future" style="cursor:pointer;background:var(--panel-2);color:var(--txt-2);border-color:var(--line);" onclick="toast2('Suggested intent (design only)')">Book leave</span>
+      </div>
+
+      <div id="ai-bar" style="display:flex;gap:8px;align-items:center;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px 12px;">
+        <input style="flex:1;background:transparent;border:none;color:var(--txt);font-family:inherit;font-size:13px;outline:none;" placeholder="Ask or speak…">
+        <i class="ti ti-microphone" style="color:var(--future);font-size:21px;cursor:pointer;" onclick="aiListen()"></i>
+      </div>
+      <div id="ai-listen" style="display:none;text-align:center;padding:16px;background:var(--future-bg);border:1px solid #3a2f63;border-radius:12px;margin-top:10px;">
+        <i class="ti ti-microphone" style="color:var(--future);font-size:30px;"></i>
+        <div style="font-size:13px;color:#c9b8ff;margin-top:8px;">Listening…</div>
+        <div class="muted" style="margin-top:3px;">"Request annual leave for Thursday"</div>
+        <button class="btn ghost sm" style="margin-top:10px;width:auto;padding:8px 16px;" onclick="aiStop()">Stop</button>
+      </div>
+      <div class="future-ribbon" style="margin-top:14px;"><i class="ti ti-shield-lock"></i><div><div class="t">Security rule for whoever specs this</div><div class="d">The assistant interprets intent and pre-fills, but always confirms before acting, and every action commits through the existing authenticated endpoints with server-side authorization. It carries no authority of its own and must never bypass enforcement.</div></div></div>
+    </div></div>
+
+  </div>
+  <div class="toast" id="toast2"><i class="ti ti-circle-check"></i><span id="toast2txt"></span></div>
+</div>
+
+<script>
+var ICONS={"arrow-left": "<path d=\"M5 12h14M5 12l6 6M5 12l6-6\"/>", "home": "<path d=\"M5 12l-2 0 9-9 9 9-2 0M5 12v7a1 1 0 0 0 1 1h3v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5h3a1 1 0 0 0 1-1v-7\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 3\"/>", "calendar": "<rect x=\"4\" y=\"5\" width=\"16\" height=\"16\" rx=\"2\"/><path d=\"M16 3v4M8 3v4M4 11h16\"/>", "dots": "<circle cx=\"5\" cy=\"12\" r=\"1.4\"/><circle cx=\"12\" cy=\"12\" r=\"1.4\"/><circle cx=\"19\" cy=\"12\" r=\"1.4\"/>", "bell": "<path d=\"M10 5a2 2 0 1 1 4 0 7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6\"/><path d=\"M9 17v1a3 3 0 0 0 6 0v-1\"/>", "fingerprint": "<path d=\"M12 10a2 2 0 0 1 2 2c0 1.5-.5 4-1 5\"/><path d=\"M8 11a4 4 0 0 1 8 0c0 2-.5 5-1.5 7\"/><path d=\"M5 12a7 7 0 0 1 14 0c0 1.5-.2 3-.5 4.5\"/><path d=\"M12 12v1c0 2-.3 4-1 6\"/>", "logout": "<path d=\"M14 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2\"/><path d=\"M9 12h12l-3-3M21 12l-3 3\"/>", "chevron-right": "<path d=\"M9 6l6 6-6 6\"/>", "alert-triangle": "<path d=\"M12 9v4M12 17v.01M10.3 4l-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0z\"/>", "circle-check": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9 12l2 2 4-4\"/>", "map-pin": "<path d=\"M12 21s-6-5.7-6-10a6 6 0 1 1 12 0c0 4.3-6 10-6 10z\"/><circle cx=\"12\" cy=\"11\" r=\"2\"/>", "edit": "<path d=\"M4 20h4l10-10a2 2 0 0 0-3-3L5 17v3z\"/><path d=\"M13.5 6.5l3 3\"/>", "plus": "<path d=\"M12 5v14M5 12h14\"/>", "plane": "<path d=\"M16 10l5-2-1-2-6 1-4-5H8l2 6-4 1-2-2H2l2 4-2 4h2l2-2 4 1-2 6h2l4-5 6 1 1-2-5-2z\"/>", "heartbeat": "<path d=\"M3 12h4l2-5 3 9 2-4h7\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"3.5\"/><path d=\"M5 21a7 7 0 0 1 14 0\"/>", "shield-lock": "<path d=\"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z\"/><circle cx=\"12\" cy=\"12\" r=\"1.5\"/><path d=\"M12 13.5V16\"/>", "help-circle": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7M12 17v.01\"/>", "device-mobile-check": "<rect x=\"6\" y=\"3\" width=\"12\" height=\"18\" rx=\"2\"/><path d=\"M9 18h6\"/><path d=\"M9.5 11l1.5 1.5 3-3\"/>", "shield-check": "<path d=\"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z\"/><path d=\"M9 12l2 2 4-4\"/>", "face-id": "<path d=\"M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2\"/><path d=\"M9 10v1M15 10v1M12 9v3l-1 1M9.5 15a3 3 0 0 0 5 0\"/>", "database": "<ellipse cx=\"12\" cy=\"6\" rx=\"7\" ry=\"3\"/><path d=\"M5 6v12c0 1.7 3 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3 3 7 3s7-1.3 7-3\"/>", "brand-windows": "<path d=\"M4 6l7-1v6H4zM13 4.5L20 4v8h-7zM4 13h7v6l-7-1zM13 13h7v8l-7-1z\"/>", "device-mobile": "<rect x=\"7\" y=\"3\" width=\"10\" height=\"18\" rx=\"2\"/><path d=\"M10 18h4\"/>", "cash": "<rect x=\"3\" y=\"6\" width=\"18\" height=\"12\" rx=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/>", "files": "<path d=\"M8 4h7l4 4v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z\"/><path d=\"M5 8v11a2 2 0 0 0 2 2h9\"/>", "users": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20a6 6 0 0 1 12 0\"/><path d=\"M16 5.5a3 3 0 0 1 0 5M22 20a6 6 0 0 0-5-5.9\"/>", "checklist": "<path d=\"M4 7l1.5 1.5L8 6M4 14l1.5 1.5L8 13\"/><path d=\"M11 7h9M11 14h9\"/>", "sparkles": "<path d=\"M12 4l1.5 4.5L18 10l-4.5 1.5L12 16l-1.5-4.5L6 10l4.5-1.5z\"/>", "flask": "<path d=\"M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3\"/>", "info-circle": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 8v.01M11 12h1v4h1\"/>", "lock": "<rect x=\"5\" y=\"11\" width=\"14\" height=\"9\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/>", "bulb": "<path d=\"M9 18h6M10 21h4M12 3a6 6 0 0 1 4 10.5c-.7.7-1 1.5-1 2.5H9c0-1-.3-1.8-1-2.5A6 6 0 0 1 12 3z\"/>", "file-dollar": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/><path d=\"M12 11v6M10.5 12.5h2a1.2 1.2 0 0 1 0 2.5h-1a1.2 1.2 0 0 0 0 2.5h2\"/>", "file-certificate": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4\"/><path d=\"M14 3v5h5\"/><circle cx=\"16\" cy=\"16\" r=\"2.5\"/><path d=\"M14.5 18l-.5 3 2-1 2 1-.5-3\"/>", "file-text": "<path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h6\"/>", "download": "<path d=\"M12 4v10M8 10l4 4 4-4M5 19h14\"/>", "microphone": "<rect x=\"9\" y=\"3\" width=\"6\" height=\"11\" rx=\"3\"/><path d=\"M5 11a7 7 0 0 0 14 0M12 18v3\"/>", "signal-4g": "<path d=\"M4 20v-3M9 20v-6M14 20v-9M19 20V8\"/>", "wifi": "<path d=\"M5 12a10 10 0 0 1 14 0M8 15a6 6 0 0 1 8 0M12 18v.01\"/>", "battery-3": "<rect x=\"3\" y=\"8\" width=\"16\" height=\"8\" rx=\"2\"/><path d=\"M21 11v2\"/><rect x=\"5\" y=\"10\" width=\"8\" height=\"4\" fill=\"currentColor\" stroke=\"none\"/>"};
+
+function setIcon(id,name){
+  var cur=document.getElementById(id);
+  if(!cur) return;
+  var i=document.createElement('i');
+  i.className='ti ti-'+name;
+  i.id=id;
+  if(cur.getAttribute('style')) i.setAttribute('style',cur.getAttribute('style'));
+  cur.replaceWith(i);
+  renderIcons();
+}
+function renderIcons(){
+  var nodes=document.querySelectorAll('i.ti');
+  nodes.forEach(function(el){
+    var cls=el.className.split(/\s+/);
+    var name=null;
+    cls.forEach(function(c){ if(c.indexOf('ti-')===0) name=c.slice(3); });
+    var path=ICONS[name];
+    if(!path){ path='<circle cx="12" cy="12" r="2"/>'; }
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');
+    svg.setAttribute('stroke-width','1.8');
+    svg.setAttribute('stroke-linecap','round');
+    svg.setAttribute('stroke-linejoin','round');
+    svg.style.width='1em'; svg.style.height='1em'; svg.style.verticalAlign='-0.125em';
+    svg.style.display='inline-block'; svg.style.flex='0 0 auto';
+    svg.innerHTML=path;
+    // copy any inline color/font-size from the original <i>
+    if(el.getAttribute('style')) svg.setAttribute('style', svg.getAttribute('style')+';'+el.getAttribute('style'));
+    if(el.id) svg.id=el.id;
+    if(el.getAttribute('onclick')) svg.setAttribute('onclick', el.getAttribute('onclick'));
+    if(el.getAttribute('title')) svg.setAttribute('title', el.getAttribute('title'));
+    svg.classList.add('svg-ic');
+    svg.setAttribute('data-icon',name);
+    el.replaceWith(svg);
+  });
+}
+
+function ob(n){document.querySelectorAll('#ob-screen .view').forEach(v=>v.classList.remove('active'));document.getElementById('ob-'+n).classList.add('active');}
+function finishOb(){document.getElementById('ob-screen').style.display='none';document.getElementById('app1').style.display='flex';render1();}
+function signout(){document.getElementById('app1').style.display='none';document.getElementById('ob-screen').style.display='block';ob(1);stack1=[];cur1='v-home';}
+
+var TITLE1={'v-home':'','v-att':'Attendance','v-day':'Mon 29 Jun','v-corr':'Request correction','v-leave':'Leave','v-leavereq':'Request leave','v-notif':'Notifications','v-more':'More','v-profile':'My profile','v-privacy':'Privacy & location'};
+var TAB1={'v-home':'v-home','v-att':'v-att','v-day':'v-att','v-corr':'v-att','v-leave':'v-leave','v-leavereq':'v-leave','v-more':'v-more','v-profile':'v-more','v-privacy':'v-more','v-notif':null};
+var stack1=[], cur1='v-home';
+function show1(id){document.querySelectorAll('#app1 .view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('screen1').scrollTop=0;}
+function render1(){
+  show1(cur1);
+  var back=document.getElementById('back1'), ttl=document.getElementById('ttl1');
+  back.style.display = stack1.length>0 ? 'flex' : 'none';
+  if(cur1==='v-home'){ttl.innerHTML='<b>People Platform</b><small>EMC</small>';}else{ttl.innerHTML='<b>'+TITLE1[cur1]+'</b>';}
+  var t=TAB1[cur1];
+  document.querySelectorAll('#app1 .nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===t);});
+  renderIcons();
+  applyCorrectionState();
+}
+function goHome1(){stack1=[];cur1='v-home';render1();}
+function tab1(id){stack1=[];cur1=id;render1();}
+function drill1(id){stack1.push(cur1);cur1=id;render1();}
+function back1(){if(stack1.length){cur1=stack1.pop();render1();}}
+
+var TITLE2={'f-menu':'','f-payslip':'Payslips','f-payslip-detail':'June 2026','f-docs':'Documents','f-docs-list':'Salary certificates','f-doc-detail':'Document','f-dir':'Directory','f-person':'Profile','f-mgr':'Approvals','f-mgr-detail':'Approval','f-mgr-corr':'Correction','f-doc-request':'Request document','f-ai':'AI assistant'};
+var stack2=[], cur2='f-menu';
+function show2(id){document.querySelectorAll('#phone2 .view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('screen2').scrollTop=0;}
+function render2(){
+  show2(cur2);
+  var back=document.getElementById('back2'), ttl=document.getElementById('ttl2');
+  back.style.display = stack2.length>0 ? 'flex' : 'none';
+  if(cur2==='f-menu'){ttl.innerHTML='<b>People Platform</b><small>EMC · ROADMAP</small>';}else{ttl.innerHTML='<b>'+TITLE2[cur2]+'</b>';}
+  renderIcons();
+}
+function goMenu2(){stack2=[];cur2='f-menu';render2();}
+function drill2(id){stack2.push(cur2);cur2=id;render2();}
+function back2(){if(stack2.length){cur2=stack2.pop();render2();}}
+
+var ci=false;
+function punch(){
+  var msg=document.getElementById('pMsg'),btn=document.getElementById('pBtn');
+  btn.style.opacity='.6';msg.textContent='Checking your location…';
+  setTimeout(function(){
+    msg.innerHTML='<i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px"></i> EMC HQ · within site';
+    setTimeout(function(){
+      btn.style.opacity='1';
+      if(!ci){ci=true;document.getElementById('pBig').textContent='Checked in';document.getElementById('pLbl').textContent='Check out';setIcon('pIcon','logout');document.getElementById('hIn').textContent='08:12';
+        msg.innerHTML='<i class="ti ti-circle-check" style="font-size:13px;vertical-align:-1px"></i> Checked in at 08:12, EMC HQ';
+      }else{ci=false;document.getElementById('pBig').textContent='Checked out';document.getElementById('pLbl').textContent='Check in';setIcon('pIcon','fingerprint');document.getElementById('hOut').textContent='17:24';document.getElementById('hHrs').textContent='8.7';
+        msg.innerHTML='<i class="ti ti-circle-check" style="font-size:13px;vertical-align:-1px"></i> Checked out at 17:24';}
+      if(navigator.vibrate)navigator.vibrate(25);
+    },800);
+  },1000);
+}
+function segp(el,t){el.parentNode.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});el.classList.add('on');document.getElementById('dur-whole').style.display=t==='whole'?'block':'none';document.getElementById('dur-half').style.display=t==='half'?'block':'none';document.getElementById('dur-hours').style.display=t==='hours'?'block':'none';}
+
+var STATE={ correctionRequested:false };
+function applyCorrectionState(){
+  if(!STATE.correctionRequested) return;
+  // attendance row Mon 29
+  var sub=document.getElementById('mon29-sub'), pill=document.getElementById('mon29-pill');
+  if(sub) sub.textContent='Correction requested · awaiting manager';
+  if(pill){ pill.textContent='Requested'; pill.className='pill info'; }
+  // home attention card -> becomes a pending note
+  var hat=document.getElementById('home-att-t'), had=document.getElementById('home-att-d');
+  if(hat) hat.textContent='Correction pending';
+  if(had) had.textContent='Mon 29 Jun · awaiting manager';
+  // day-detail banner -> requested
+  var bt=document.getElementById('day-ban-t'), bd=document.getElementById('day-ban-d'), co=document.getElementById('day-co');
+  if(bt) bt.textContent='Correction requested';
+  if(bd) bd.textContent='A correction for the missing check-out is awaiting manager approval.';
+  if(co){ co.textContent='17:24 (requested)'; co.style.color='var(--emc-cyan)'; }
+}
+function addLeaveRequest(){
+  var list=document.getElementById('leave-list');
+  if(!list) return;
+  var row=document.createElement('div');
+  row.className='listrow';
+  row.innerHTML='<div class="ic"><i class="ti ti-plane"></i></div><div class="gr"><div class="t">Annual · 2 days</div><div class="d">12\u201313 Jul · just submitted</div></div><span class="pill warn">Pending</span>';
+  list.insertBefore(row, list.firstChild);
+  renderIcons();
+}
+function submitFlow(msg, dest){
+  if(dest==='v-att'){ STATE.correctionRequested=true; }
+  toast1(msg);
+  setTimeout(function(){
+    if(dest==='v-att'){ applyCorrectionState(); }
+    if(dest==='v-leave'){ addLeaveRequest(); }
+    if(dest){ stack1=[]; cur1=dest; render1(); }
+  }, 900);
+}
+
+var tt;function toast1(m){var t=document.getElementById('toast1');document.getElementById('toast1txt').textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2200);}
+
+function mgrView(which){
+  document.getElementById('mgr-seg-p').classList.toggle('on',which==='p');
+  document.getElementById('mgr-seg-d').classList.toggle('on',which==='d');
+  document.getElementById('mgr-pending').style.display = which==='p'?'block':'none';
+  document.getElementById('mgr-decided').style.display = which==='d'?'block':'none';
+  renderIcons();
+}
+function aiListen(){document.getElementById('ai-bar').style.display='none';document.getElementById('ai-listen').style.display='block';renderIcons();}
+function aiStop(){document.getElementById('ai-listen').style.display='none';document.getElementById('ai-bar').style.display='flex';renderIcons();}
+function dirView(which){
+  document.getElementById('dir-seg-list').classList.toggle('on',which==='list');
+  document.getElementById('dir-seg-org').classList.toggle('on',which==='org');
+  document.getElementById('dir-list').style.display = which==='list'?'block':'none';
+  document.getElementById('dir-org').style.display = which==='org'?'block':'none';
+  renderIcons();
+}
+function dirFilter(){
+  var q=(document.getElementById('dir-search').value||'').toLowerCase();
+  document.querySelectorAll('#dir-people .listrow').forEach(function(r){
+    r.style.display = r.getAttribute('data-n').indexOf(q)>=0 ? 'flex' : 'none';
+  });
+}
+function orgToggle(id){
+  var el=document.getElementById(id), c=document.getElementById(id+'-c');
+  if(!el) return;
+  var hidden = el.style.display==='none';
+  el.style.display = hidden?'block':'none';
+  if(c){ c.className = hidden ? 'ti ti-chevron-down chev' : 'ti ti-chevron-right chev'; renderIcons(); }
+}
+var tt2;function toast2(m){var t=document.getElementById('toast2');document.getElementById('toast2txt').textContent=m;t.classList.add('show');clearTimeout(tt2);tt2=setTimeout(function(){t.classList.remove('show');},2200);}
+
+render2();
+renderIcons();
+</script>
+</body>
+</html>
