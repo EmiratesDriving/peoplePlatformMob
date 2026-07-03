@@ -8,7 +8,7 @@
 PRODUCT_NAME = peoplehr
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.peoplehr
+PRODUCT_BUNDLE_IDENTIFIER = com.emc.peoplehr
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.emc. All rights reserved.
